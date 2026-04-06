@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emboss Your Shit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Righteous&family=Bebas+Neue&family=Oswald:wght@400;700&family=Anton&family=Playfair+Display:wght@400;700&family=Abril+Fatface&family=Fredoka+One&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; font-family: 'Figtree', system-ui, sans-serif; background: #f5f5f5; }
+
+    :root {
+      --brand: #040c5b;
+      --brand-05: rgba(4,12,91,0.05);
+      --brand-10: rgba(4,12,91,0.10);
+      --brand-20: rgba(4,12,91,0.20);
+      --brand-40: rgba(4,12,91,0.40);
+      --brand-60: rgba(4,12,91,0.60);
+    }
+
+    /* ── header ── */
+    #header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; height: 52px;
+      background: white; border-bottom: 1px solid var(--brand-10);
+      flex-shrink: 0;
+    }
+    .logo-row { display: flex; align-items: center; gap: 10px; }
+    .logo-mark {
+      width: 32px; height: 32px; border-radius: 7px;
+      background: var(--brand);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 800; color: white; letter-spacing: -1px;
+    }
+    .logo-name { font-size: 15px; font-weight: 700; color: var(--brand); letter-spacing: 0.01em; }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+
+    /* ── layout ── */
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── sidebar ── */
+    #sidebar {
+      width: 280px; flex-shrink: 0;
+      background: white; border-right: 1px solid var(--brand-10);
+      overflow-y: auto; display: flex; flex-direction: column;
+    }
+    /* custom scrollbar */
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: var(--brand-20); border-radius: 2px; }
+
+    .panel { padding: 16px; border-bottom: 1px solid var(--brand-10); }
+    .panel:last-child { border-bottom: none; }
+
+    .panel-title {
+      font-size: 9px; font-weight: 700; color: var(--brand-40);
+      text-transform: uppercase; letter-spacing: 0.12em;
+      margin-bottom: 12px;
+    }
+
+    /* ── control rows ── */
+    .ctrl { margin-bottom: 10px; }
+    .ctrl:last-child { margin-bottom: 0; }
+
+    .ctrl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .ctrl-label { font-size: 12px; font-weight: 500; color: var(--brand); }
+    .ctrl-val { font-size: 11px; color: var(--brand-60); font-family: monospace; background: var(--brand-05); padding: 1px 5px; border-radius: 3px; }
+
+    /* range */
+    input[type=range] {
+      width: 100%; height: 3px; border-radius: 2px;
+      -webkit-appearance: none; appearance: none;
+      background: var(--brand-20); cursor: pointer; outline: none;
+      accent-color: var(--brand);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px; height: 13px; border-radius: 50%;
+      background: var(--brand); border: 2px solid white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 13px; height: 13px; border-radius: 50%;
+      background: var(--brand); border: 2px solid white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+
+    /* select */
+    select {
+      width: 100%; height: 34px; padding: 0 28px 0 10px;
+      border: 1px solid var(--brand-20); border-radius: 7px;
+      font-size: 12px; color: var(--brand);
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23040c5b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center;
+      -webkit-appearance: none; appearance: none; cursor: pointer; outline: none;
+      font-family: inherit; font-weight: 500;
+      transition: border-color 0.15s;
+    }
+    select:focus { border-color: var(--brand-40); }
+
+    /* textarea */
+    textarea {
+      width: 100%; padding: 9px 10px;
+      border: 1px solid var(--brand-20); border-radius: 7px;
+      font-size: 13px; color: var(--brand);
+      background: var(--brand-05); resize: none;
+      font-family: inherit; outline: none;
+      transition: border-color 0.15s; line-height: 1.5;
+      min-height: 72px;
+    }
+    textarea:focus { border-color: var(--brand-40); background: white; }
+    textarea::placeholder { color: var(--brand-40); }
+
+    /* alignment */
+    .align-group { display: flex; gap: 4px; }
+    .align-btn {
+      flex: 1; height: 32px;
+      border: 1px solid var(--brand-20); border-radius: 6px;
+      background: white; color: var(--brand-60); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.12s; font-size: 12px;
+    }
+    .align-btn:hover { background: var(--brand-05); color: var(--brand); }
+    .align-btn.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+    /* color picker */
+    .color-ctrl { display: flex; align-items: center; gap: 8px; }
+    .color-swatch-wrap {
+      position: relative; width: 34px; height: 34px;
+      border-radius: 7px; overflow: hidden;
+      border: 1px solid var(--brand-20); cursor: pointer; flex-shrink: 0;
+    }
+    .color-swatch-wrap input[type=color] {
+      position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
+      border: none; padding: 0; cursor: pointer; opacity: 0;
+    }
+    .color-preview {
+      position: absolute; inset: 0; border-radius: 6px; pointer-events: none;
+    }
+    .color-hex {
+      flex: 1; height: 34px; padding: 0 10px;
+      border: 1px solid var(--brand-20); border-radius: 7px;
+      font-size: 12px; font-family: monospace; color: var(--brand);
+      background: var(--brand-05); outline: none;
+      transition: border-color 0.15s;
+    }
+    .color-hex:focus { border-color: var(--brand-40); background: white; }
+
+    /* buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 0 14px; border: none; border-radius: 7px;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+      font-family: inherit; white-space: nowrap;
+    }
+    .btn-primary { height: 34px; background: var(--brand); color: white; }
+    .btn-primary:hover { background: #06107a; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-ghost { height: 32px; background: transparent; color: var(--brand-60); border: 1px solid var(--brand-20); }
+    .btn-ghost:hover { background: var(--brand-05); color: var(--brand); }
+    .btn-full { width: 100%; }
+    .btn-danger { height: 32px; background: transparent; color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .btn-danger:hover { background: rgba(220,38,38,0.05); }
+
+    .icon { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+    /* ── preview ── */
+    #preview-area { flex: 1; position: relative; overflow: hidden; }
+    #preview-bg { position: absolute; inset: 0; }
+    #preview-text {
+      position: absolute; white-space: pre-wrap;
+      width: 80%; max-width: 1200px;
+      transform: translate(-50%, -50%);
+      user-select: none;
+    }
+
+    /* ── toast ── */
+    #toast-container {
+      position: fixed; bottom: 20px; right: 20px;
+      display: flex; flex-direction: column; gap: 6px; z-index: 100;
+    }
+    .toast {
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      animation: toastIn 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+    }
+    .toast-success { background: #111827; color: white; }
+    .toast-error   { background: #dc2626; color: white; }
+    .toast-loading { background: #374151; color: white; }
+    @keyframes toastIn {
+      from { transform: translateX(110%) scale(0.9); opacity: 0; }
+      to   { transform: translateX(0) scale(1);      opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div class="logo-row">
+    <div class="logo-mark">E</div>
+    <span class="logo-name">Emboss Your Shit</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="copyCSS()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Copy CSS
+    </button>
+    <button class="btn btn-primary" onclick="saveAsImage()">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Save PNG
+    </button>
+  </div>
+</div>
+
+<!-- Body -->
+<div id="main">
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+
+    <!-- Text -->
+    <div class="panel">
+      <div class="panel-title">Text</div>
+      <div class="ctrl">
+        <textarea id="text-input" placeholder="Type something..."></textarea>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-label" style="margin-bottom:5px">Alignment</div>
+        <div class="align-group">
+          <button class="align-btn" id="align-left" onclick="setAlign('left')" title="Left">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="21" y1="6" x2="3" y2="6"/><line x1="15" y1="12" x2="3" y2="12"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+          </button>
+          <button class="align-btn active" id="align-center" onclick="setAlign('center')" title="Center">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="21" y1="6" x2="3" y2="6"/><line x1="17" y1="12" x2="7" y2="12"/><line x1="19" y1="18" x2="5" y2="18"/></svg>
+          </button>
+          <button class="align-btn" id="align-right" onclick="setAlign('right')" title="Right">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="12" x2="9" y2="12"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-full" onclick="copyText()" style="margin-top:4px">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Text
+      </button>
+    </div>
+
+    <!-- Typography -->
+    <div class="panel">
+      <div class="panel-title">Typography</div>
+      <div class="ctrl">
+        <div class="ctrl-label" style="margin-bottom:5px">Font</div>
+        <select id="font-family"></select>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Size</span>
+          <span class="ctrl-val" id="font-size-val">70px</span>
+        </div>
+        <input type="range" id="font-size" min="20" max="200" step="1" value="70"
+          oninput="setVal('font-size-val', this.value, 'px'); update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Letter Spacing</span>
+          <span class="ctrl-val" id="tracking-val">0px</span>
+        </div>
+        <input type="range" id="tracking" min="-5" max="20" step="0.5" value="0"
+          oninput="setVal('tracking-val', this.value, 'px'); update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Line Height</span>
+          <span class="ctrl-val" id="line-height-val">1.2</span>
+        </div>
+        <input type="range" id="line-height" min="0.8" max="3" step="0.1" value="1.2"
+          oninput="setVal('line-height-val', parseFloat(this.value).toFixed(1), ''); update()">
+      </div>
+    </div>
+
+    <!-- Emboss -->
+    <div class="panel">
+      <div class="panel-title">Emboss Effect</div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Light Angle</span>
+          <span class="ctrl-val" id="light-angle-val">135°</span>
+        </div>
+        <input type="range" id="light-angle" min="0" max="360" step="5" value="135"
+          oninput="setVal('light-angle-val', this.value, '°'); update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Shadow Depth</span>
+          <span class="ctrl-val" id="shadow-depth-val">3px</span>
+        </div>
+        <input type="range" id="shadow-depth" min="0.5" max="12" step="0.5" value="3"
+          oninput="setVal('shadow-depth-val', this.value, 'px'); update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Shadow Blur</span>
+          <span class="ctrl-val" id="shadow-blur-val">10px</span>
+        </div>
+        <input type="range" id="shadow-blur" min="0" max="30" step="1" value="10"
+          oninput="setVal('shadow-blur-val', this.value, 'px'); update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Text Opacity</span>
+          <span class="ctrl-val" id="text-opacity-val">20%</span>
+        </div>
+        <input type="range" id="text-opacity" min="0" max="100" step="1" value="20"
+          oninput="setVal('text-opacity-val', this.value, '%'); update()">
+      </div>
+    </div>
+
+    <!-- Colour -->
+    <div class="panel">
+      <div class="panel-title">Colour</div>
+      <div class="ctrl">
+        <div class="ctrl-label" style="margin-bottom:5px">Background</div>
+        <div class="color-ctrl">
+          <div class="color-swatch-wrap" id="bg-swatch-wrap">
+            <div class="color-preview" id="bg-preview"></div>
+            <input type="color" id="bg-color" value="#414141">
+          </div>
+          <input type="text" class="color-hex" id="bg-hex" value="#414141" maxlength="7" spellcheck="false">
+        </div>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-label" style="margin-bottom:5px">Text Colour</div>
+        <div class="color-ctrl">
+          <div class="color-swatch-wrap" id="text-swatch-wrap">
+            <div class="color-preview" id="text-preview"></div>
+            <input type="color" id="text-color" value="#3f3f3f">
+          </div>
+          <input type="text" class="color-hex" id="text-hex" value="#3f3f3f" maxlength="7" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+    <!-- Position -->
+    <div class="panel">
+      <div class="panel-title">Position</div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Horizontal</span>
+          <span class="ctrl-val" id="x-pos-val">50%</span>
+        </div>
+        <input type="range" id="x-pos" min="0" max="100" step="1" value="50"
+          oninput="setVal('x-pos-val', this.value, '%'); update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Vertical</span>
+          <span class="ctrl-val" id="y-pos-val">50%</span>
+        </div>
+        <input type="range" id="y-pos" min="0" max="100" step="1" value="50"
+          oninput="setVal('y-pos-val', this.value, '%'); update()">
+      </div>
+    </div>
+
+    <!-- Reset -->
+    <div class="panel">
+      <button class="btn btn-danger btn-full" onclick="resetAll()">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.87"/></svg>
+        Reset to Defaults
+      </button>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- Preview -->
+  <div id="preview-area">
+    <div id="preview-bg">
+      <div id="preview-text"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div id="toast-container"></div>
+
+<script>
+  // ── fonts ──────────────────────────────────────────────────────────────
+  const fontFamilies = [
+    { name: 'Lobster',          value: "'Lobster', cursive" },
+    { name: 'Righteous',        value: "'Righteous', cursive" },
+    { name: 'Bebas Neue',       value: "'Bebas Neue', cursive" },
+    { name: 'Oswald',           value: "'Oswald', sans-serif" },
+    { name: 'Anton',            value: "'Anton', sans-serif" },
+    { name: 'Playfair Display', value: "'Playfair Display', serif" },
+    { name: 'Abril Fatface',    value: "'Abril Fatface', cursive" },
+    { name: 'Fredoka One',      value: "'Fredoka One', cursive" },
+  ];
+
+  // ── defaults ───────────────────────────────────────────────────────────
+  const DEFAULTS = {
+    text: 'This is an\nembossing effect',
+    fontSize: 70, tracking: 0, lineHeight: 1.2, textAlign: 'center',
+    xPos: 50, yPos: 50,
+    bgColor: '#414141', textColor: '#3f3f3f',
+    textOpacity: 20, shadowDepth: 3, shadowBlur: 10, lightAngle: 135,
+    fontFamily: fontFamilies[0].value,
+  };
+
+  // ── state ──────────────────────────────────────────────────────────────
+  let currentAlign = DEFAULTS.textAlign;
+
+  // ── helpers ────────────────────────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+  const numVal = id => parseFloat($(id).value);
+  const strVal = id => $(id).value;
+
+  function setVal(id, v, suffix) { $(id).textContent = v + suffix; }
+
+  function isValidHex(h) { return /^#[0-9a-fA-F]{6}$/.test(h); }
+
+  function syncColor(colorId, previewId, hexId) {
+    const color = strVal(colorId);
+    $(previewId).style.background = color;
+    $(hexId).value = color;
+    update();
+  }
+
+  function onHexInput(hexId, colorId, previewId) {
+    let v = $(hexId).value.trim();
+    if (!v.startsWith('#')) v = '#' + v;
+    if (isValidHex(v)) {
+      $(colorId).value = v;
+      $(previewId).style.background = v;
+      update();
+    }
+  }
+
+  function setAlign(align) {
+    currentAlign = align;
+    ['left','center','right'].forEach(a =>
+      $('align-' + a).classList.toggle('active', a === align)
+    );
+    update();
+  }
+
+  function buildEmbossShadow(angle, offset, blur) {
+    const rad = (angle * Math.PI) / 180;
+    const dx  = parseFloat((Math.cos(rad) * offset).toFixed(1));
+    const dy  = parseFloat((-Math.sin(rad) * offset).toFixed(1));
+    const s   = Math.max(0.5, offset / 3);
+    const sdx = parseFloat((Math.cos(rad) * s).toFixed(1));
+    const sdy = parseFloat((-Math.sin(rad) * s).toFixed(1));
+    const sb  = Math.max(2, Math.round(blur / 4));
+    return [
+      `${dx}px ${dy}px ${blur}px rgba(0,0,0,0.3)`,
+      `${-dx}px ${-dy}px ${blur}px rgba(96,96,96,0.6)`,
+      `${sdx}px ${sdy}px ${sb}px rgba(0,0,0,0.4)`,
+    ].join(', ');
+  }
+
+  function hexToRgba(hex, pct) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return `rgba(${r},${g},${b},${pct/100})`;
+  }
+
+  // ── update preview ─────────────────────────────────────────────────────
+  function update() {
+    const bgColor      = strVal('bg-color');
+    const textColor    = strVal('text-color');
+
+    // keep swatches in sync
+    $('bg-preview').style.background   = bgColor;
+    $('text-preview').style.background = textColor;
+
+    // preview background
+    $('preview-bg').style.background = bgColor;
+
+    // text
+    const el = $('preview-text');
+    el.textContent         = strVal('text-input');
+    el.style.left          = numVal('x-pos') + '%';
+    el.style.top           = numVal('y-pos') + '%';
+    el.style.fontFamily    = strVal('font-family');
+    el.style.fontSize      = numVal('font-size') + 'px';
+    el.style.lineHeight    = numVal('line-height');
+    el.style.letterSpacing = numVal('tracking') + 'px';
+    el.style.textAlign     = currentAlign;
+    el.style.textShadow    = buildEmbossShadow(numVal('light-angle'), numVal('shadow-depth'), numVal('shadow-blur'));
+    el.style.color         = hexToRgba(textColor, numVal('text-opacity'));
+  }
+
+  // ── actions ────────────────────────────────────────────────────────────
+  function copyText() {
+    navigator.clipboard.writeText(strVal('text-input'))
+      .then(() => toast('Text copied!'));
+  }
+
+  async function saveAsImage() {
+    const t = toast('Generating...', 'loading', 0);
+    try {
+      const canvas = await html2canvas($('preview-bg'), {
+        backgroundColor: strVal('bg-color'), scale: 2
+      });
+      const a = document.createElement('a');
+      a.download = 'emboss-design.png';
+      a.href = canvas.toDataURL();
+      a.click();
+      t.remove(); toast('Saved!');
+    } catch {
+      t.remove(); toast('Failed to save', 'error');
+    }
+  }
+
+  function copyCSS() {
+    const shadow = buildEmbossShadow(numVal('light-angle'), numVal('shadow-depth'), numVal('shadow-blur'));
+    const color  = hexToRgba(strVal('text-color'), numVal('text-opacity'));
+    const css = [
+      `text-shadow: ${shadow};`,
+      `color: ${color};`,
+      `font-family: ${strVal('font-family')};`,
+      `font-size: ${numVal('font-size')}px;`,
+      `line-height: ${numVal('line-height')};`,
+      `letter-spacing: ${numVal('tracking')}px;`,
+      `text-align: ${currentAlign};`,
+    ].join('\n');
+    navigator.clipboard.writeText(css).then(() => toast('CSS copied!'));
+  }
+
+  function resetAll() {
+    const d = DEFAULTS;
+    $('text-input').value    = d.text;
+    $('font-family').value   = d.fontFamily;
+    $('font-size').value     = d.fontSize;     setVal('font-size-val',    d.fontSize,              'px');
+    $('tracking').value      = d.tracking;     setVal('tracking-val',     d.tracking,              'px');
+    $('line-height').value   = d.lineHeight;   setVal('line-height-val',  d.lineHeight.toFixed(1), '');
+    $('light-angle').value   = d.lightAngle;   setVal('light-angle-val',  d.lightAngle,            '°');
+    $('shadow-depth').value  = d.shadowDepth;  setVal('shadow-depth-val', d.shadowDepth,           'px');
+    $('shadow-blur').value   = d.shadowBlur;   setVal('shadow-blur-val',  d.shadowBlur,            'px');
+    $('text-opacity').value  = d.textOpacity;  setVal('text-opacity-val', d.textOpacity,           '%');
+    $('x-pos').value         = d.xPos;         setVal('x-pos-val',        d.xPos,                  '%');
+    $('y-pos').value         = d.yPos;         setVal('y-pos-val',        d.yPos,                  '%');
+    $('bg-color').value   = d.bgColor;   $('bg-hex').value   = d.bgColor;
+    $('text-color').value = d.textColor; $('text-hex').value = d.textColor;
+    setAlign(d.textAlign);
+    update();
+    toast('Reset!');
+  }
+
+  // ── toast ──────────────────────────────────────────────────────────────
+  function toast(msg, type = 'success', duration = 2500) {
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = msg;
+    $('toast-container').appendChild(el);
+    if (duration > 0) setTimeout(() => el.remove(), duration);
+    return el;
+  }
+
+  // ── init ───────────────────────────────────────────────────────────────
+  (function init() {
+    // font select
+    const sel = $('font-family');
+    fontFamilies.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.value; opt.textContent = f.name;
+      sel.appendChild(opt);
+    });
+    sel.value = DEFAULTS.fontFamily;
+    sel.addEventListener('change', update);
+
+    // text
+    $('text-input').value = DEFAULTS.text;
+    $('text-input').addEventListener('input', update);
+
+    // color pickers — native picker updates on change/input
+    $('bg-color').addEventListener('input',  () => syncColor('bg-color',   'bg-preview',   'bg-hex'));
+    $('bg-color').addEventListener('change', () => syncColor('bg-color',   'bg-preview',   'bg-hex'));
+    $('text-color').addEventListener('input',  () => syncColor('text-color', 'text-preview', 'text-hex'));
+    $('text-color').addEventListener('change', () => syncColor('text-color', 'text-preview', 'text-hex'));
+
+    // hex text inputs
+    $('bg-hex').addEventListener('input',  () => onHexInput('bg-hex',   'bg-color',   'bg-preview'));
+    $('bg-hex').addEventListener('change', () => onHexInput('bg-hex',   'bg-color',   'bg-preview'));
+    $('text-hex').addEventListener('input',  () => onHexInput('text-hex', 'text-color', 'text-preview'));
+    $('text-hex').addEventListener('change', () => onHexInput('text-hex', 'text-color', 'text-preview'));
+
+    // render initial state
+    update();
+  })();
+</script>
+</body>
+</html>
