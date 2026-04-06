@@ -1,5 +1,5 @@
 # embossedfont
-a generator that creates embossed text
+a generator that creates embossed [text](https://elizwangwastaken.github.io/embossedfont/)
 
 # about
 i think embossed text just looks way cooler than normal text
